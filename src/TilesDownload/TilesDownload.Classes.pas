@@ -47,7 +47,7 @@ type
     procedure SetValues(x, y: Integer);
   end;
 
-  TSaveMethod = (smFolders, smPattern);
+  TSaveMethod = (smFolders, smPattern, smLazmapviewer);
   TFilterType = (ftNone, ftGrayscale);
   TPatternItem = (piProviderName, piZoom, piX, piY);
 
@@ -120,6 +120,7 @@ type
     procedure SetPattern(APattern: String);
     function GetCoordinate(Index: Integer): RCoordinate;
     procedure SetCoordinate(Index: Integer; AValue: RCoordinate);
+    procedure SetSaveMethod(AValue: TSaveMethod);
     procedure SetTileRes(AValue: Integer);
     function GetTotalTilesCount: Longword;
     function GetTotalTilesCountOnCoordinates: Longword;
@@ -133,6 +134,7 @@ type
     function CalcZoomTilesCount(ATile1, ATile2: RTile): Longword; overload;
     function GetFileNameDir(const AZoom, AX, AY: Integer): String;
     function GetFileNamePattern(const AZoom, AX, AY: Integer): String;
+    function GetFileNameLazmapviewer(const AZoom, AX, AY: Integer): String;
     function GetFileName(const AZoom, AX, AY: Integer): String;
     procedure ReceiveTile(var ATileImg: TBGRABitmap; const AProviderLink: String; const AZoom: Integer; const ATile: RTile);
     procedure ResampleTile(var ATileImg: TBGRABitmap; const ATileRes: Integer);
@@ -148,7 +150,7 @@ type
     property OutPath        : String      read GetOutPath      write SetOutPath     ;
     property TileRes        : Integer     read FTileRes        write SetTileRes     ;
     property Pattern        : String      read FPattern        write SetPattern     ;
-    property SaveMethod     : TSaveMethod read FSaveMethod     write FSaveMethod     default defSaveMethod;
+    property SaveMethod     : TSaveMethod read FSaveMethod     write SetSaveMethod   default defSaveMethod;
     property Filter         : TFilterType read FFilter         write SetFilter       default defFilter;
     property MinZoom        : Integer     read FMinZoom        write FMinZoom        default defMinZoom;
     property MaxZoom        : Integer     read FMaxZoom        write FMaxZoom        default defMaxZoom;
@@ -400,6 +402,18 @@ begin
   FCoordinates[Index] := AValue;
 end;
 
+procedure CTilesDownloader.SetSaveMethod(AValue: TSaveMethod);
+begin
+  if FSaveMethod = AValue then Exit;
+
+  FSaveMethod := AValue;
+  case AValue of
+    smLazmapviewer: begin
+      FGetFileName := @GetFileNameLazmapviewer;
+    end;
+  end;
+end;
+
 constructor CTilesDownloader.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
@@ -489,6 +503,12 @@ begin
     end;
   end;
   Result := Result + IfThen(ShowFileType, '.png');
+end;
+
+function CTilesDownloader.GetFileNameLazmapviewer(const AZoom, AX, AY: Integer
+  ): String;
+begin
+  Result := Format('%d%s%d_%d%s', [AZoom, PathDelim, AX, AY, IfThen(ShowFileType, '.png')]);
 end;
 
 function CTilesDownloader.GetFileName(const AZoom, AX, AY: Integer): String;
@@ -641,7 +661,7 @@ begin
 
   for iz := MinZoom to MaxZoom do
   begin
-    if SaveMethod = smFolders then
+    if SaveMethod in [smFolders, smLazmapviewer] then
     if not DirectoryExists(Format('%s/%d', [OutPath, iz])) then
     if not ForceDirectories(Format('%s/%d', [OutPath, iz])) then
       raise Exception.Create('The necessary paths could not be created. Check the specified path');
@@ -713,7 +733,7 @@ begin
     LZoomCurrentCount := 0;
     LZoomTotalCount := CalcZoomTilesCount(iz);
 
-    if SaveMethod = smFolders then
+    if SaveMethod in [smFolders, smLazmapviewer] then
     if not DirectoryExists(Format('%s%s%d', [OutPath, PathDelim, iz])) then
       ForceDirectories(Format('%s%s%d', [OutPath, PathDelim, iz]));
 

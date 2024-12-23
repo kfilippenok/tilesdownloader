@@ -130,8 +130,13 @@ type
       if not OptionParameter[okTileRes].IsEmpty then
         TileRes := OptionParameter[okTileRes].ToInteger;
 
-      if not OptionParameter[okPattern].IsEmpty then
-        Pattern := OptionParameter[okPattern];
+      if okPattern in glOptions then
+      begin
+        if not OptionParameter[okPattern].IsEmpty then
+          Pattern := OptionParameter[okPattern];
+      end
+      else if (okLazmapviewer in glOptions) then
+        SaveMethod := smLazmapviewer;
 
       ShowFileType := okShowFileType in glOptions;
       SkipMissing := okSkipMissing in glOptions;

@@ -30,6 +30,7 @@ TOptionKind = (okHelp,
                okProviderLink,
                okOutput,
                okPattern,
+               okLazmapviewer,
                okMinZoom,
                okMaxZoom,
                okFirstCoordLat,
@@ -58,6 +59,7 @@ begin
     okProviderLink  : Exit('provider-link');
     okOutput        : Exit('output');
     okPattern       : Exit('pattern');
+    okLazmapviewer  : Exit('lazmapviewer');
     okMinZoom       : Exit('min-zoom');
     okMaxZoom       : Exit('max-zoom');
     okFirstCoordLat : Exit('fcoord-lat');

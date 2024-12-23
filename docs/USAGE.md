@@ -166,6 +166,16 @@ Example:
 
 ****
 
+### lazmapviewer
+
+Save images in specific way for LazMapViewer:
+
+```
+/provider-name/zoom/x_y
+```
+
+****
+
 ### show-file-type
 
 If you need the file extension in the name, use this option. The parameter with the file extension is not specified, since the image is always downloaded as a *PNG*.
